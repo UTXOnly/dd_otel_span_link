@@ -1,0 +1,57 @@
+plugins {
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1' // Apply the Shadow plugin
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.guava:guava:32.0.1-jre'
+    implementation 'io.opentelemetry:opentelemetry-api:1.19.0'
+    implementation 'io.opentelemetry:opentelemetry-sdk:1.19.0'
+    implementation 'io.opentelemetry:opentelemetry-exporter-otlp:1.19.0'
+
+    // Datadog and OpenTracing dependencies
+    implementation 'com.datadoghq:dd-trace-api:1.10.0'
+    implementation 'io.opentracing:opentracing-api:0.33.0'
+    implementation 'io.opentracing:opentracing-util:0.33.0'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.3'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
+}
+
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+application {
+    mainClass = 'span_link.App'
+}
+
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'span_link.App'
+        )
+    }
+}
+
+tasks.named('run') {
+    jvmArgs = ['-javaagent:./dd-java-agent.jar']
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Use the shadowJar task to build a fat/uber jar
+tasks.named('shadowJar') {
+    manifest {
+        attributes 'Main-Class': application.mainClass.get()
+    }
+}
