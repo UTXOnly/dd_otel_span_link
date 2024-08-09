@@ -48,9 +48,6 @@ OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader clas
 ```
 
 
-<img width="1207" alt="otel_span3" src="https://github.com/user-attachments/assets/bef0c0b9-5855-479f-8fad-16e626ffce9d">
+![otel_linkg](https://github.com/user-attachments/assets/500ea897-61e0-48c3-87f9-cdb81ed4edf6)
 
-
-
-<img width="1217" alt="otel_span2" src="https://github.com/user-attachments/assets/f1bb9364-12ae-4ef4-94b3-e3d4ccc4c3f0">
 
