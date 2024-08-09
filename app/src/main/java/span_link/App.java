@@ -25,17 +25,17 @@ public class App {
     private static final io.opentelemetry.api.trace.Tracer otelTracer;
 
     static {
-        // Set up OpenTelemetry SDK with OTLP exporter and enhanced logging
+        // Set up OpenTelemetry SDK with OTLP exporter configured for Datadog
         OtlpGrpcSpanExporter spanExporter = OtlpGrpcSpanExporter.builder()
-                .setEndpoint("http://localhost:4317/v1/traces") // Ensure this matches your Datadog Agent's OTLP endpoint
-                .setTimeout(30, TimeUnit.SECONDS)  // Increased timeout for debugging
+                .setEndpoint("http://localhost:4317/v1/traces")  // Datadog OTLP ingest endpoint
+                .setTimeout(30, TimeUnit.SECONDS)  // Increased timeout for stability
                 .build();
 
         SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
                 .addSpanProcessor(BatchSpanProcessor.builder(spanExporter)
                         .build())
                 .setResource(Resource.getDefault().toBuilder()
-                        .put("service.name", "otel-service")  // Set service name for OpenTelemetry
+                        .put("service.name", "otel-service")  // Set service name for OpenTelemetry spans
                         .build())
                 .build();
 
@@ -59,9 +59,6 @@ public class App {
 
         // Link the Datadog trace with an OpenTelemetry span using the same trace ID
         linkSpanToDatadog(datadogSpan);
-
-        // Create a simple OTEL span for debugging
-        createSimpleOtelSpan();
 
         // Close Datadog span
         datadogSpan.finish();
@@ -108,8 +105,9 @@ public class App {
         // Get the Datadog SpanContext and create a link in the OpenTelemetry span
         SpanContext otelSpanContext = convertToOtelSpanContext(datadogSpan.context());
 
+        // Create a new span with links to the Datadog span
         Span currentSpan = otelTracer.spanBuilder("otel-span-with-link")
-                .setParent(Context.root().with(Span.wrap(otelSpanContext))) // Use Datadog span context as parent
+                .addLink(otelSpanContext)  // Link to the Datadog span
                 .startSpan();
 
         try (Scope otelScope = currentSpan.makeCurrent()) {  // Correct OpenTelemetry Scope
@@ -130,12 +128,5 @@ public class App {
                 TraceFlags.getDefault(),
                 TraceState.getDefault()
         );
-    }
-
-    private static void createSimpleOtelSpan() {
-        // Create a simple OTEL span for debugging
-        Span simpleSpan = otelTracer.spanBuilder("simple-otel-span").startSpan();
-        logger.info("Created simple OTEL span with Trace ID: {}", simpleSpan.getSpanContext().getTraceId());
-        simpleSpan.end();
     }
 }
