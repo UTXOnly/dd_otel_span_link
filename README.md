@@ -1,5 +1,6 @@
-## span_link
+# Datadog + OTel Java span_link
 
+Provides a simple example of show you can link OTel spans to traces/spans from the Datadog Java tracer.
 
 ### Setup
 
